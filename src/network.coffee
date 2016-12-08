@@ -45,6 +45,14 @@ class Network
     sortTopologically: =>
         sortedNodes = []
         unsortedNodes = _.clone @nodes
+
+        # Check if there is duplicated layer name
+        set = {}
+        for node in unsortedNodes
+            if node.name of set
+                throw 'The layer has duplicated name: ' + node.name
+            else
+                set[node.name] = 1
         for node in unsortedNodes
             node.sort_ = {temp:false, perm: false}
         visit = (node) ->

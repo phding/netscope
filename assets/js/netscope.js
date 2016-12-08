@@ -2129,18 +2129,27 @@ module.exports = Network = (function() {
   };
 
   Network.prototype.sortTopologically = function() {
-    var i, j, len, len1, node, sortedNodes, unsortedNodes, visit;
+    var i, j, k, len, len1, len2, node, set, sortedNodes, unsortedNodes, visit;
     sortedNodes = [];
     unsortedNodes = _.clone(this.nodes);
+    set = {};
     for (i = 0, len = unsortedNodes.length; i < len; i++) {
       node = unsortedNodes[i];
+      if (node.name in set) {
+        throw 'The layer has duplicated name: ' + node.name;
+      } else {
+        set[node.name] = 1;
+      }
+    }
+    for (j = 0, len1 = unsortedNodes.length; j < len1; j++) {
+      node = unsortedNodes[j];
       node.sort_ = {
         temp: false,
         perm: false
       };
     }
     visit = function(node) {
-      var child, j, len1, ref;
+      var child, k, len2, ref;
       if (node.sort_.temp === true) {
         throw 'Graph is not a DAG. Complicit node: ' + node.name;
       }
@@ -2149,8 +2158,8 @@ module.exports = Network = (function() {
       }
       node.sort_.temp = true;
       ref = node.children;
-      for (j = 0, len1 = ref.length; j < len1; j++) {
-        child = ref[j];
+      for (k = 0, len2 = ref.length; k < len2; k++) {
+        child = ref[k];
         visit(child);
       }
       node.sort_.perm = true;
@@ -2160,8 +2169,8 @@ module.exports = Network = (function() {
     while (unsortedNodes.length !== 0) {
       visit(unsortedNodes.pop());
     }
-    for (j = 0, len1 = sortedNodes.length; j < len1; j++) {
-      node = sortedNodes[j];
+    for (k = 0, len2 = sortedNodes.length; k < len2; k++) {
+      node = sortedNodes[k];
       delete node.sort_;
     }
     return sortedNodes;
